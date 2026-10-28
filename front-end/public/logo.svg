@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none">
+  <rect x="2" y="2" width="36" height="36" rx="9" fill="#111111"/>
+  <rect x="2.5" y="2.5" width="35" height="35" rx="8.5" stroke="#a89160" stroke-opacity="0.4"/>
+  <path d="M10 17L20 9L30 17V29C30 30.1046 29.1046 31 28 31H12C10.8954 31 10 30.1046 10 29V17Z" stroke="#c9b68c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 31V20H24V31" stroke="#c9b68c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="48" y="27" font-family="'Playfair Display', Georgia, serif" font-size="22" font-weight="700" fill="#111111">Stay<tspan fill="#a89160">Haven</tspan></text>
+</svg>
+

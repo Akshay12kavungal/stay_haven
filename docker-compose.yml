@@ -1,0 +1,65 @@
+# StayHaven: Postgres + Django (gunicorn) + nginx serving the React build.
+#   cp .env.example .env    # then edit secrets
+#   docker compose up -d --build
+#   open http://localhost:3000
+name: stay_haven
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-spotyourstay}
+      POSTGRES_USER: ${DB_USER:-spot}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-spot}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,[::1]}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://[::1]:3000,http://localhost:8000,http://127.0.0.1:8000,http://[::1]:8000}
+      DJANGO_CORS_ALLOWED_ORIGINS: ${DJANGO_CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://[::1]:3000,http://localhost:8000,http://127.0.0.1:8000,http://[::1]:8000}
+      DJANGO_USE_X_FORWARDED_HOST: "True"
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
+      DB_NAME: ${DB_NAME:-spotyourstay}
+      DB_USER: ${DB_USER:-spot}
+      DB_PASSWORD: ${DB_PASSWORD:-spot}
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_SSLMODE: disable
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+    volumes:
+      - media:/app/media
+
+  web:
+    build: ./front-end
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-3000}:80"
+    volumes:
+      - media:/srv/media:ro
+
+volumes:
+  pgdata:
+    name: spot_your_stay_pgdata
+  media:
+    name: spot_your_stay_media
